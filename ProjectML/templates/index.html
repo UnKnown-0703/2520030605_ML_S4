@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Prediction System | KL University CSE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Top Navigation Header -->
+    <header class="top-nav">
+        <div class="nav-container">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+                        <path d="M12 5v14" opacity="0.3"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="brand-title">CardioPredict <span>AI</span></div>
+                    <div class="brand-subtitle">Heart Disease Clinical Decision Support System</div>
+                </div>
+            </div>
+            
+            <div class="academic-tag">
+                <span class="dept-badge">KL University • CSE Dept</span>
+                <span class="ay-badge">A.Y. 2026-27</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Project Context Banner -->
+        <section class="project-info-card">
+            <div class="project-header">
+                <div>
+                    <span class="tag-pill">Machine Learning Capstone Project</span>
+                    <h1 class="project-title">Heart Disease Prediction Using Logistic Regression, SVM & KNN</h1>
+                    <p class="project-desc">
+                        Predicts cardiovascular disease risk using 13 clinical biomarkers from the 1,025-patient Cleveland clinical dataset.
+                    </p>
+                </div>
+                <div class="authors-box">
+                    <div class="authors-label">Project Team</div>
+                    <div class="author-name"><strong>T. Bhargava Sai Sunil</strong> (2520030605)</div>
+                    <div class="author-name"><strong>V. Prem Kumar</strong> (2520030479)</div>
+                    <div class="guide-name">Under Guidance of: <span>Prof. Jyothsna Datti</span></div>
+                </div>
+            </div>
+
+            <!-- Fast Model Benchmark Cards -->
+            <div class="benchmark-strip">
+                {% for name, metric in metrics.items() %}
+                <div class="metric-chip">
+                    <div class="metric-model">{{ name }}</div>
+                    <div class="metric-stats">
+                        <span class="stat-acc">Acc: <strong>{{ metric.accuracy }}%</strong></span>
+                        <span class="stat-auc">AUC: <strong>{{ metric.roc_auc }}%</strong></span>
+                        <span class="stat-f1">F1: <strong>{{ metric.f1_score }}%</strong></span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Quick Presets Toolbar -->
+        <section class="presets-bar">
+            <div class="presets-label">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span>Quick Test Presets:</span>
+            </div>
+            <div class="presets-buttons">
+                <button type="button" class="btn-preset btn-preset-healthy" onclick="loadPreset('no_disease')">
+                    <span class="dot dot-green"></span> Sample: No Disease (Negative)
+                </button>
+                <button type="button" class="btn-preset btn-preset-danger" onclick="loadPreset('disease_patient')">
+                    <span class="dot dot-red"></span> Sample: Heart Disease (Positive)
+                </button>
+                <button type="button" class="btn-preset btn-preset-warn" onclick="loadPreset('borderline')">
+                    <span class="dot dot-amber"></span> Dataset Row #0
+                </button>
+                <button type="button" class="btn-preset" onclick="loadPreset('young_disease')">
+                    <span class="dot dot-blue"></span> Young Patient (Positive)
+                </button>
+                <button type="button" class="btn-reset" onclick="resetForm()">
+                    ↺ Clear
+                </button>
+            </div>
+        </section>
+
+        <!-- Form and Result Grid -->
+        <div class="dashboard-grid">
+            <!-- Left Side: Patient Input Form -->
+            <div class="form-column">
+                <form id="patientForm" onsubmit="handleFormSubmit(event)">
+                    
+                    <!-- Card 1: Demographics & Routine Vitals -->
+                    <div class="card form-card">
+                        <div class="card-header">
+                            <div class="card-number">1</div>
+                            <div>
+                                <h2 class="card-title">Demographics & Routine Vitals</h2>
+                                <p class="card-subtitle">Basic patient profile and resting circulatory vitals</p>
+                            </div>
+                        </div>
+
+                        <div class="card-body form-grid">
+                            <!-- Age -->
+                            <div class="input-group">
+                                <label for="age">Patient Age <span class="unit">(years)</span></label>
+                                <input type="number" id="age" name="age" min="18" max="100" placeholder="e.g. 52" required>
+                                <span class="help-text">Adult range (18 – 100)</span>
+                            </div>
+
+                            <!-- Sex -->
+                            <div class="input-group">
+                                <label for="sex">Biological Sex</label>
+                                <select id="sex" name="sex" required>
+                                    <option value="1">Male</option>
+                                    <option value="0">Female</option>
+                                </select>
+                                <span class="help-text">Cardiovascular risk profiling</span>
+                            </div>
+
+                            <!-- Resting Blood Pressure (trestbps) -->
+                            <div class="input-group">
+                                <label for="trestbps">Resting Blood Pressure <span class="unit">(mm Hg)</span></label>
+                                <input type="number" id="trestbps" name="trestbps" min="80" max="220" placeholder="e.g. 125" required>
+                                <span class="help-text">Normal: &lt; 120 mm Hg; Hypertensive: &ge; 130</span>
+                            </div>
+
+                            <!-- Serum Cholesterol (chol) -->
+                            <div class="input-group">
+                                <label for="chol">Serum Cholesterol <span class="unit">(mg/dL)</span></label>
+                                <input type="number" id="chol" name="chol" min="100" max="600" placeholder="e.g. 212" required>
+                                <span class="help-text">Desirable: &lt; 200; High: &ge; 240 mg/dL</span>
+                            </div>
+
+                            <!-- Fasting Blood Sugar (fbs) -->
+                            <div class="input-group">
+                                <label for="fbs">Fasting Blood Sugar</label>
+                                <select id="fbs" name="fbs" required>
+                                    <option value="0">Normal (&le; 120 mg/dL)</option>
+                                    <option value="1">Elevated (&gt; 120 mg/dL) [Diabetic marker]</option>
+                                </select>
+                                <span class="help-text">Fasting venous plasma glucose</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Symptoms & Stress Test -->
+                    <div class="card form-card">
+                        <div class="card-header">
+                            <div class="card-number">2</div>
+                            <div>
+                                <h2 class="card-title">Symptoms & Exercise Stress Test</h2>
+                                <p class="card-subtitle">Cardiac response during treadmill / stress test</p>
+                            </div>
+                        </div>
+
+                        <div class="card-body form-grid">
+                            <!-- Chest Pain Type (cp) -->
+                            <div class="input-group full-width">
+                                <label for="cp">Chest Pain Type <span class="unit">(cp)</span></label>
+                                <select id="cp" name="cp" required>
+                                    <option value="0">0: Typical Angina (Chest pain triggered by exertion/stress)</option>
+                                    <option value="1">1: Atypical Angina (Discomfort not clearly related to exertion)</option>
+                                    <option value="2">2: Non-Anginal Pain (Sharp/burning sensation, non-cardiac)</option>
+                                    <option value="3">3: Asymptomatic (No overt chest pain experienced)</option>
+                                </select>
+                                <span class="help-text">Clinical manifestation of myocardial ischemia</span>
+                            </div>
+
+                            <!-- Max Heart Rate (thalach) -->
+                            <div class="input-group">
+                                <label for="thalach">Max Heart Rate <span class="unit">(bpm)</span></label>
+                                <input type="number" id="thalach" name="thalach" min="60" max="230" placeholder="e.g. 168" required>
+                                <span class="help-text">Highest heart rate attained during stress</span>
+                            </div>
+
+                            <!-- Exercise Induced Angina (exang) -->
+                            <div class="input-group">
+                                <label for="exang">Exercise-Induced Angina</label>
+                                <select id="exang" name="exang" required>
+                                    <option value="0">No (Pain does not worsen with exercise)</option>
+                                    <option value="1">Yes (Chest tightness/pain elicited by exertion)</option>
+                                </select>
+                                <span class="help-text">Induced under treadmill stress</span>
+                            </div>
+
+                            <!-- ST Depression (oldpeak) -->
+                            <div class="input-group">
+                                <label for="oldpeak">ST Depression <span class="unit">(mm - oldpeak)</span></label>
+                                <input type="number" step="0.1" id="oldpeak" name="oldpeak" min="0" max="7.0" placeholder="e.g. 1.0" required>
+                                <span class="help-text">ST depression induced relative to rest</span>
+                            </div>
+
+                            <!-- Peak Exercise ST Slope (slope) -->
+                            <div class="input-group">
+                                <label for="slope">ST Segment Slope</label>
+                                <select id="slope" name="slope" required>
+                                    <option value="2">2: Downsloping (High risk ischemia)</option>
+                                    <option value="1">1: Flat (Equivocal / moderate risk)</option>
+                                    <option value="0">0: Upsloping (Typically normal physiological response)</option>
+                                </select>
+                                <span class="help-text">Slope morphology during peak exertion</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Electrocardiogram & Diagnostics -->
+                    <div class="card form-card">
+                        <div class="card-header">
+                            <div class="card-number">3</div>
+                            <div>
+                                <h2 class="card-title">ECG & Fluoroscopy Diagnostics</h2>
+                                <p class="card-subtitle">Resting electrical signals and arterial imaging</p>
+                            </div>
+                        </div>
+
+                        <div class="card-body form-grid">
+                            <!-- Resting ECG (restecg) -->
+                            <div class="input-group full-width">
+                                <label for="restecg">Resting Electrocardiogram</label>
+                                <select id="restecg" name="restecg" required>
+                                    <option value="0">0: Normal</option>
+                                    <option value="1">1: ST-T Wave Abnormality (T wave inversions / ST depression)</option>
+                                    <option value="2">2: Left Ventricular Hypertrophy (Estes' criteria)</option>
+                                </select>
+                                <span class="help-text">Resting 12-lead ECG tracing</span>
+                            </div>
+
+                            <!-- Major Vessels (ca) -->
+                            <div class="input-group">
+                                <label for="ca">Major Vessels Colored <span class="unit">(ca: 0 - 4)</span></label>
+                                <select id="ca" name="ca" required>
+                                    <option value="0">0 Vessels (Clean coronary circulation)</option>
+                                    <option value="1">1 Vessel Blocked / Calcified</option>
+                                    <option value="2">2 Vessels Blocked / Calcified</option>
+                                    <option value="3">3 Vessels Blocked / Calcified</option>
+                                    <option value="4">4 Vessels (Multiple vessel disease)</option>
+                                </select>
+                                <span class="help-text">Fluoroscopy arterial contrast imaging</span>
+                            </div>
+
+                            <!-- Thalassemia (thal) -->
+                            <div class="input-group">
+                                <label for="thal">Thallium Perfusion <span class="unit">(thal)</span></label>
+                                <select id="thal" name="thal" required>
+                                    <option value="2">2: Normal blood flow</option>
+                                    <option value="3">3: Reversible defect (Ischemic heart disease indicator)</option>
+                                    <option value="1">1: Fixed defect (Previous myocardial infarction scar)</option>
+                                    <option value="0">0: Null / Baseline</option>
+                                </select>
+                                <span class="help-text">Nuclear scintigraphy heart scan</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Primary Action & Model Selector Bar -->
+                    <div class="action-bar card">
+                        <div class="model-select-wrapper">
+                            <label for="modelSelect">Select Prediction Model:</label>
+                            <select id="modelSelect" name="model">
+                                <option value="Support Vector Machine (SVM)" selected>Support Vector Machine (SVM) — 92.7% Acc</option>
+                                <option value="Logistic Regression">Logistic Regression (L2) — 81.0% Acc</option>
+                                <option value="K-Nearest Neighbors (KNN)">K-Nearest Neighbors (KNN) — 100% Acc</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="btn-predict">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span>Analyze Patient &amp; Predict</span>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Right Side: Real-Time Prediction Outcome & Diagnostics -->
+            <div class="results-column">
+                
+                <!-- Initial Placeholder Card -->
+                <div id="resultsPlaceholder" class="card placeholder-card">
+                    <div class="placeholder-icon">
+                        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                        </svg>
+                    </div>
+                    <h3>Ready for Patient Data</h3>
+                    <p>Enter patient vitals and diagnostic readings on the left, or click one of the <strong>Quick Test Presets</strong> above, then click <strong>Analyze Patient &amp; Predict</strong>.</p>
+                    <div class="placeholder-tip">
+                        💡 <strong>Tip:</strong> Try testing with the <em>Healthy Patient</em> and <em>Symptomatic Patient</em> presets to see how the model differentiates risk factors.
+                    </div>
+                </div>
+
+                <!-- Active Prediction Results Card (Hidden until submitted) -->
+                <div id="resultsContainer" class="card result-card" style="display: none;">
+                    
+                    <!-- Top Status Banner -->
+                    <div id="resultBanner" class="result-banner">
+                        <div class="status-indicator">
+                            <div id="statusIcon" class="status-icon-box"></div>
+                            <div>
+                                <span class="status-sublabel">Model Diagnostic Output</span>
+                                <h2 id="resultTitle" class="result-title">Analyzing...</h2>
+                            </div>
+                        </div>
+                        <div class="model-badge-tag" id="activeModelTag">SVM</div>
+                    </div>
+
+                    <!-- Probability Gauge & Bar -->
+                    <div class="probability-section">
+                        <div class="prob-header">
+                            <span class="prob-label">Cardiovascular Risk Probability</span>
+                            <span id="probNumber" class="prob-val">0%</span>
+                        </div>
+                        <div class="progress-bar-track">
+                            <div id="progressBar" class="progress-bar-fill" style="width: 0%;"></div>
+                        </div>
+                        <div class="prob-scale">
+                            <span>0% (Optimal)</span>
+                            <span>35% (Moderate)</span>
+                            <span>65% (High Risk)</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+
+                    <!-- Clinical Recommendations -->
+                    <div class="clinical-box">
+                        <div class="section-heading">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                            <span>Clinical Interpretation &amp; Guidance</span>
+                        </div>
+                        <p id="guidanceText" class="guidance-text"></p>
+                    </div>
+
+                    <!-- Detected Biomarkers & Risk Factors -->
+                    <div class="factors-section">
+                        <div class="section-heading">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                            </svg>
+                            <span>Patient Biomarker Risk Flags</span>
+                        </div>
+                        <ul id="riskFactorsList" class="factors-list">
+                            <!-- Injected dynamically -->
+                        </ul>
+                    </div>
+
+                    <!-- Multi-Model Consensus Breakdown -->
+                    <div class="models-consensus-box">
+                        <div class="section-heading">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                <polyline points="2 17 12 22 22 17"></polyline>
+                                <polyline points="2 12 12 17 22 12"></polyline>
+                            </svg>
+                            <span>Multi-Model Consensus (LR, SVM, KNN)</span>
+                        </div>
+                        <div id="modelsBreakdown" class="models-grid">
+                            <!-- Injected dynamically -->
+                        </div>
+                        <div id="consensusSummary" class="consensus-footer"></div>
+                    </div>
+
+                    <!-- Medical Disclaimer -->
+                    <div class="disclaimer-box">
+                        <strong>Academic Clinical Note:</strong> This application is developed for academic research and educational decision-support under the KL University CSE Machine Learning curriculum. Final medical diagnosis and treatment plans must always be performed by a licensed physician or certified cardiologist.
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <p><strong>Heart Disease Prediction System</strong> • Machine Learning Project</p>
+            <p>Koneru Lakshmaiah Education Foundation (KL Deemed to be University) • Department of Computer Science &amp; Engineering</p>
+            <p class="credits">Students: T. Bhargava Sai Sunil (2520030605), V. Prem Kumar (2520030479) | Faculty Guide: Prof. Jyothsna Datti</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
